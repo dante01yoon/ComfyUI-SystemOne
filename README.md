@@ -20,6 +20,15 @@ between them.
 
 ## Install
 
+From the [Comfy Registry](https://registry.comfy.org/nodes/comfyui-systemone):
+search for **System One** in ComfyUI Manager, or run
+
+```bash
+comfy node install comfyui-systemone
+```
+
+Or install from source:
+
 ```bash
 cd ComfyUI/custom_nodes
 git clone https://github.com/dante01yoon/ComfyUI-SystemOne
