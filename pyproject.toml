@@ -11,5 +11,4 @@ Repository = "https://github.com/dante01yoon/ComfyUI-SystemOne"
 [tool.comfy]
 PublisherId = "dante01yoon"
 DisplayName = "System One (Jev / Laya)"
-Icon = ""
 
