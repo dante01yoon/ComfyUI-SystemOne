@@ -1,0 +1,15 @@
+[project]
+name = "comfyui-systemone"
+version = "0.1.0"
+description = "ComfyUI nodes that ask a System One decision model (Laya locally or Jev over the TypeSafe API) a typed question, so workflows can branch on natural-language judgment."
+license = { file = "LICENSE" }
+dependencies = ["laya>=0.3.24"]
+
+[project.urls]
+Repository = "https://github.com/dante01yoon/ComfyUI-SystemOne"
+
+[tool.comfy]
+PublisherId = "dante01yoon"
+DisplayName = "System One (Jev / Laya)"
+Icon = ""
+
