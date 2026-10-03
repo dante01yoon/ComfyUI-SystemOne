@@ -20,6 +20,8 @@ between them.
 
 ![Style router demo](docs/media/style_router.gif)
 
+**New in 0.2.0:** automatic image QA with Cloudflare Clef. [Watch the 48-second intro](docs/media/clef-image-qa-promo.mp4).
+
 ## Install
 
 From the [Comfy Registry](https://registry.comfy.org/nodes/comfyui-systemone):
