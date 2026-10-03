@@ -1,0 +1,144 @@
+{
+ "1": {
+  "class_type": "CheckpointLoaderSimple",
+  "inputs": {
+   "ckpt_name": "sd_xl_turbo_1.0_fp16.safetensors"
+  }
+ },
+ "2": {
+  "class_type": "SystemOneBackend",
+  "inputs": {
+   "provider": "laya",
+   "laya_checkpoint": "convaiinnovations/laya",
+   "device": "auto",
+   "jev_model": "jev-1.13.0"
+  }
+ },
+ "3": {
+  "class_type": "PrimitiveStringMultiline",
+  "inputs": {
+   "value": "watercolor painting of a cat sleeping by the window"
+  }
+ },
+ "4": {
+  "class_type": "SystemOneScore",
+  "inputs": {
+   "backend": [
+    "2",
+    0
+   ],
+   "state": [
+    "3",
+    0
+   ],
+   "instructions": "How visually complex is the scene this image prompt describes?",
+   "levels": "a single simple subject on a plain background\na subject in a simple setting\na detailed scene with several elements\na busy, intricate scene with many subjects and fine detail"
+  }
+ },
+ "5": {
+  "class_type": "ComfyMathExpression",
+  "inputs": {
+   "expression": "1 + a * 2",
+   "values.a": [
+    "4",
+    1
+   ]
+  }
+ },
+ "6": {
+  "class_type": "StringConcatenate",
+  "inputs": {
+   "string_a": [
+    "3",
+    0
+   ],
+   "string_b": "highly detailed",
+   "delimiter": ", "
+  }
+ },
+ "7": {
+  "class_type": "CLIPTextEncode",
+  "inputs": {
+   "clip": [
+    "1",
+    1
+   ],
+   "text": [
+    "6",
+    0
+   ]
+  }
+ },
+ "8": {
+  "class_type": "CLIPTextEncode",
+  "inputs": {
+   "clip": [
+    "1",
+    1
+   ],
+   "text": "blurry, lowres, text, watermark"
+  }
+ },
+ "9": {
+  "class_type": "EmptyLatentImage",
+  "inputs": {
+   "width": 512,
+   "height": 512,
+   "batch_size": 1
+  }
+ },
+ "10": {
+  "class_type": "KSampler",
+  "inputs": {
+   "model": [
+    "1",
+    0
+   ],
+   "positive": [
+    "7",
+    0
+   ],
+   "negative": [
+    "8",
+    0
+   ],
+   "latent_image": [
+    "9",
+    0
+   ],
+   "seed": 42,
+   "control_after_generate": "fixed",
+   "steps": [
+    "5",
+    1
+   ],
+   "cfg": 1.0,
+   "sampler_name": "euler_ancestral",
+   "scheduler": "sgm_uniform",
+   "denoise": 1.0
+  }
+ },
+ "11": {
+  "class_type": "VAEDecode",
+  "inputs": {
+   "samples": [
+    "10",
+    0
+   ],
+   "vae": [
+    "1",
+    2
+   ]
+  }
+ },
+ "12": {
+  "class_type": "SaveImage",
+  "inputs": {
+   "images": [
+    "11",
+    0
+   ],
+   "filename_prefix": "systemone/adaptive_steps"
+  }
+ }
+}
