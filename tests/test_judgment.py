@@ -14,7 +14,7 @@ class FakeBackend:
     name: str = "fake"
     calls: list = field(default_factory=list)
 
-    def ask(self, state, questions):
+    def ask(self, state, questions, images=None):
         self.calls.append((state, questions))
         return {qid: self.answer for qid in questions}
 
