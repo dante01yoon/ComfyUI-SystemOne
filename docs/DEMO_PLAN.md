@@ -27,11 +27,17 @@ Recording: three prompts back to back. Watercolor and anime prompts route to
 their styles; the ambiguous "a knight riding a dragon" drops below 0.5 and the
 fallback kicks in. The on-node probability bars carry the story.
 
-### 2. Adaptive steps (Score)
-Prompt -> **Score** ("how visually complex is the scene", 4 levels) -> `level`
-INT -> `ComfyMathExpression` (`4 + a * 4`) -> `KSampler.steps`.
-Recording: a single-subject prompt renders at 4 steps, a crowded city at 16.
-Shows a judgment driving a numeric parameter, not just a branch.
+### 2. Kid-safe gate (Score, Laya)
+Prompt -> **Score** ("how graphic or disturbing would the image be", 4 levels)
+-> `ComfyMathExpression` (`a >= 2`) -> `If/Else Switch` (true: a kid-safe
+replacement prompt, false: the user's prompt) -> `KSampler`.
+Probe on 12 prompts: every safe prompt scored <= 1.39 (knight vs dragon,
+pirate ship, cartoon pumpkin), every gore prompt >= 2.39, so a 2.0 cut is
+12/12. The same question as a Noul was 11/12. Gore never renders: the swap
+happens before sampling.
+Replaced the earlier "adaptive steps" idea. Its scores were in the right order
+but confidence was 0.12-0.15, and SDXL Turbo barely changes between 3 and 5
+steps, so the demo showed nothing.
 
 ### 3. Prompt guard (Noul, Jev vs Laya)
 Prompt -> **Yes/No** ("names a real celebrity or public figure?") -> `verdict`

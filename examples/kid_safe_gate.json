@@ -1,0 +1,1003 @@
+{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "revision": 0,
+  "last_node_id": 13,
+  "last_link_id": 32,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "CheckpointLoaderSimple",
+      "pos": [
+        40,
+        900
+      ],
+      "size": [
+        225,
+        0
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "ckpt_name",
+          "name": "ckpt_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "ckpt_name"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "MODEL",
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            26
+          ]
+        },
+        {
+          "localized_name": "CLIP",
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            23,
+            25
+          ]
+        },
+        {
+          "localized_name": "VAE",
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            31
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CheckpointLoaderSimple"
+      },
+      "widgets_values": [
+        "sd_xl_turbo_1.0_fp16.safetensors"
+      ],
+      "widgets_values_named": {
+        "ckpt_name": "sd_xl_turbo_1.0_fp16.safetensors"
+      }
+    },
+    {
+      "id": 2,
+      "type": "SystemOneBackend",
+      "pos": [
+        40,
+        260
+      ],
+      "size": [
+        440,
+        190
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "provider",
+          "name": "provider",
+          "type": "COMBO",
+          "widget": {
+            "name": "provider"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "laya_checkpoint",
+          "name": "laya_checkpoint",
+          "type": "COMBO",
+          "widget": {
+            "name": "laya_checkpoint"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "device",
+          "name": "device",
+          "type": "COMBO",
+          "widget": {
+            "name": "device"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "jev_model",
+          "name": "jev_model",
+          "type": "STRING",
+          "widget": {
+            "name": "jev_model"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "backend",
+          "name": "backend",
+          "type": "SYSTEMONE_BACKEND",
+          "links": [
+            17
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SystemOneBackend"
+      },
+      "widgets_values": [
+        "laya",
+        "convaiinnovations/laya",
+        "auto",
+        "jev-1.13.0"
+      ],
+      "widgets_values_named": {
+        "provider": "laya",
+        "laya_checkpoint": "convaiinnovations/laya",
+        "device": "auto",
+        "jev_model": "jev-1.13.0"
+      }
+    },
+    {
+      "id": 3,
+      "type": "PrimitiveStringMultiline",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        440,
+        180
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "value",
+          "name": "value",
+          "type": "STRING",
+          "widget": {
+            "name": "value"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "STRING",
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            18,
+            22
+          ]
+        }
+      ],
+      "title": "Your prompt",
+      "properties": {
+        "Node name for S&R": "PrimitiveStringMultiline"
+      },
+      "widgets_values": [
+        "a knight fighting a dragon with a sword"
+      ],
+      "widgets_values_named": {
+        "value": "a knight fighting a dragon with a sword"
+      }
+    },
+    {
+      "id": 4,
+      "type": "SystemOneScore",
+      "pos": [
+        520,
+        40
+      ],
+      "size": [
+        560,
+        700
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "backend",
+          "name": "backend",
+          "type": "SYSTEMONE_BACKEND",
+          "link": 17
+        },
+        {
+          "localized_name": "state",
+          "name": "state",
+          "type": "STRING",
+          "widget": {
+            "name": "state"
+          },
+          "link": 18
+        },
+        {
+          "localized_name": "instructions",
+          "name": "instructions",
+          "type": "STRING",
+          "widget": {
+            "name": "instructions"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "levels",
+          "name": "levels",
+          "type": "STRING",
+          "widget": {
+            "name": "levels"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "score",
+          "name": "score",
+          "type": "FLOAT",
+          "links": [
+            19
+          ]
+        },
+        {
+          "localized_name": "level",
+          "name": "level",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "localized_name": "confidence",
+          "name": "confidence",
+          "type": "FLOAT",
+          "links": null
+        },
+        {
+          "localized_name": "report",
+          "name": "report",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "title": "System One Score: how graphic?",
+      "properties": {
+        "Node name for S&R": "SystemOneScore"
+      },
+      "widgets_values": [
+        "",
+        "How graphic or disturbing would the image described by this prompt be?",
+        "none: wholesome or neutral\nmild: cartoon action or spooky but not gory\nstrong: realistic violence\nextreme: gore, blood, mutilation"
+      ],
+      "widgets_values_named": {
+        "state": "",
+        "instructions": "How graphic or disturbing would the image described by this prompt be?",
+        "levels": "none: wholesome or neutral\nmild: cartoon action or spooky but not gory\nstrong: realistic violence\nextreme: gore, blood, mutilation"
+      }
+    },
+    {
+      "id": 5,
+      "type": "ComfyMathExpression",
+      "pos": [
+        1120,
+        40
+      ],
+      "size": [
+        420,
+        160
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "a",
+          "localized_name": "values.a",
+          "name": "values.a",
+          "type": "FLOAT,INT,BOOLEAN",
+          "link": 19
+        },
+        {
+          "label": "b",
+          "localized_name": "values.b",
+          "name": "values.b",
+          "shape": 7,
+          "type": "FLOAT,INT,BOOLEAN",
+          "link": null
+        },
+        {
+          "localized_name": "expression",
+          "name": "expression",
+          "type": "STRING",
+          "widget": {
+            "name": "expression"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "FLOAT",
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": null
+        },
+        {
+          "localized_name": "INT",
+          "name": "INT",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "localized_name": "BOOL",
+          "name": "BOOL",
+          "type": "BOOLEAN",
+          "links": [
+            20
+          ]
+        }
+      ],
+      "title": "Too graphic for kids? (score >= 2)",
+      "properties": {
+        "Node name for S&R": "ComfyMathExpression"
+      },
+      "widgets_values": [
+        "a >= 2"
+      ],
+      "widgets_values_named": {
+        "expression": "a >= 2"
+      }
+    },
+    {
+      "id": 6,
+      "type": "PrimitiveStringMultiline",
+      "pos": [
+        1120,
+        240
+      ],
+      "size": [
+        420,
+        160
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "value",
+          "name": "value",
+          "type": "STRING",
+          "widget": {
+            "name": "value"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "STRING",
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            21
+          ]
+        }
+      ],
+      "title": "Kid-safe replacement prompt",
+      "properties": {
+        "Node name for S&R": "PrimitiveStringMultiline"
+      },
+      "widgets_values": [
+        "a cozy cartoon library with friendly animals reading books, warm light"
+      ],
+      "widgets_values_named": {
+        "value": "a cozy cartoon library with friendly animals reading books, warm light"
+      }
+    },
+    {
+      "id": 7,
+      "type": "ComfySwitchNode",
+      "pos": [
+        1120,
+        440
+      ],
+      "size": [
+        420,
+        130
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "on_false",
+          "name": "on_false",
+          "type": "STRING",
+          "link": 22
+        },
+        {
+          "localized_name": "on_true",
+          "name": "on_true",
+          "type": "STRING",
+          "link": 21
+        },
+        {
+          "localized_name": "switch",
+          "name": "switch",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "switch"
+          },
+          "link": 20
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "output",
+          "name": "output",
+          "type": "STRING",
+          "links": [
+            24
+          ]
+        }
+      ],
+      "title": "Prompt used",
+      "properties": {
+        "Node name for S&R": "ComfySwitchNode"
+      },
+      "widgets_values": [
+        false
+      ],
+      "widgets_values_named": {
+        "switch": false
+      }
+    },
+    {
+      "id": 8,
+      "type": "CLIPTextEncode",
+      "pos": [
+        300,
+        900
+      ],
+      "size": [
+        225,
+        0
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "clip",
+          "name": "clip",
+          "type": "CLIP",
+          "link": 23
+        },
+        {
+          "localized_name": "text",
+          "name": "text",
+          "type": "STRING",
+          "widget": {
+            "name": "text"
+          },
+          "link": 24
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "CONDITIONING",
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            27
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        ""
+      ],
+      "widgets_values_named": {
+        "text": ""
+      }
+    },
+    {
+      "id": 9,
+      "type": "CLIPTextEncode",
+      "pos": [
+        560,
+        900
+      ],
+      "size": [
+        225,
+        0
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "clip",
+          "name": "clip",
+          "type": "CLIP",
+          "link": 25
+        },
+        {
+          "localized_name": "text",
+          "name": "text",
+          "type": "STRING",
+          "widget": {
+            "name": "text"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "CONDITIONING",
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            28
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "blurry, lowres, text, watermark"
+      ],
+      "widgets_values_named": {
+        "text": "blurry, lowres, text, watermark"
+      }
+    },
+    {
+      "id": 10,
+      "type": "EmptyLatentImage",
+      "pos": [
+        820,
+        900
+      ],
+      "size": [
+        225,
+        0
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "width",
+          "name": "width",
+          "type": "INT",
+          "widget": {
+            "name": "width"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "height",
+          "name": "height",
+          "type": "INT",
+          "widget": {
+            "name": "height"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "batch_size",
+          "name": "batch_size",
+          "type": "INT",
+          "widget": {
+            "name": "batch_size"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "LATENT",
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            29
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptyLatentImage"
+      },
+      "widgets_values": [
+        512,
+        512,
+        1
+      ],
+      "widgets_values_named": {
+        "width": 512,
+        "height": 512,
+        "batch_size": 1
+      }
+    },
+    {
+      "id": 11,
+      "type": "KSampler",
+      "pos": [
+        1080,
+        900
+      ],
+      "size": [
+        225,
+        0
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "model",
+          "name": "model",
+          "type": "MODEL",
+          "link": 26
+        },
+        {
+          "localized_name": "positive",
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 27
+        },
+        {
+          "localized_name": "negative",
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 28
+        },
+        {
+          "localized_name": "latent_image",
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 29
+        },
+        {
+          "localized_name": "seed",
+          "name": "seed",
+          "type": "INT",
+          "widget": {
+            "name": "seed"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "steps",
+          "name": "steps",
+          "type": "INT",
+          "widget": {
+            "name": "steps"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "cfg",
+          "name": "cfg",
+          "type": "FLOAT",
+          "widget": {
+            "name": "cfg"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "sampler_name",
+          "name": "sampler_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "sampler_name"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "scheduler",
+          "name": "scheduler",
+          "type": "COMBO",
+          "widget": {
+            "name": "scheduler"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "denoise",
+          "name": "denoise",
+          "type": "FLOAT",
+          "widget": {
+            "name": "denoise"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "LATENT",
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            30
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        42,
+        "fixed",
+        4,
+        1,
+        "euler_ancestral",
+        "sgm_uniform",
+        1
+      ],
+      "widgets_values_named": {
+        "seed": 42,
+        "control_after_generate": "fixed",
+        "steps": 4,
+        "cfg": 1,
+        "sampler_name": "euler_ancestral",
+        "scheduler": "sgm_uniform",
+        "denoise": 1
+      }
+    },
+    {
+      "id": 12,
+      "type": "VAEDecode",
+      "pos": [
+        1340,
+        900
+      ],
+      "size": [
+        225,
+        0
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "samples",
+          "name": "samples",
+          "type": "LATENT",
+          "link": 30
+        },
+        {
+          "localized_name": "vae",
+          "name": "vae",
+          "type": "VAE",
+          "link": 31
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "IMAGE",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            32
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      }
+    },
+    {
+      "id": 13,
+      "type": "SaveImage",
+      "pos": [
+        1580,
+        40
+      ],
+      "size": [
+        560,
+        640
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "images",
+          "name": "images",
+          "type": "IMAGE",
+          "link": 32
+        },
+        {
+          "localized_name": "filename_prefix",
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": {
+            "name": "filename_prefix"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "images",
+          "name": "images",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "title": "Result",
+      "properties": {},
+      "widgets_values": [
+        "systemone/kid_safe_gate"
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "systemone/kid_safe_gate"
+      }
+    }
+  ],
+  "links": [
+    [
+      17,
+      2,
+      0,
+      4,
+      0,
+      "SYSTEMONE_BACKEND"
+    ],
+    [
+      18,
+      3,
+      0,
+      4,
+      1,
+      "STRING"
+    ],
+    [
+      19,
+      4,
+      0,
+      5,
+      0,
+      "FLOAT"
+    ],
+    [
+      20,
+      5,
+      2,
+      7,
+      2,
+      "BOOLEAN"
+    ],
+    [
+      21,
+      6,
+      0,
+      7,
+      1,
+      "STRING"
+    ],
+    [
+      22,
+      3,
+      0,
+      7,
+      0,
+      "STRING"
+    ],
+    [
+      23,
+      1,
+      1,
+      8,
+      0,
+      "CLIP"
+    ],
+    [
+      24,
+      7,
+      0,
+      8,
+      1,
+      "STRING"
+    ],
+    [
+      25,
+      1,
+      1,
+      9,
+      0,
+      "CLIP"
+    ],
+    [
+      26,
+      1,
+      0,
+      11,
+      0,
+      "MODEL"
+    ],
+    [
+      27,
+      8,
+      0,
+      11,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      28,
+      9,
+      0,
+      11,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      29,
+      10,
+      0,
+      11,
+      3,
+      "LATENT"
+    ],
+    [
+      30,
+      11,
+      0,
+      12,
+      0,
+      "LATENT"
+    ],
+    [
+      31,
+      1,
+      2,
+      12,
+      1,
+      "VAE"
+    ],
+    [
+      32,
+      12,
+      0,
+      13,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.6792452830188679,
+      "offset": [
+        323.3333333333335,
+        340
+      ]
+    }
+  },
+  "version": 0.4
+}

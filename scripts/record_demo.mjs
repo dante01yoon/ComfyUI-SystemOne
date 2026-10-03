@@ -50,29 +50,45 @@ await page.waitForTimeout(800)
 const uiWorkflow = await page.evaluate(() => window.app.graph.serialize())
 fs.writeFileSync(path.join(path.dirname(apiPath), `${name}.json`), JSON.stringify(uiWorkflow, null, 2))
 
-for (const text of prompts) {
-  await page.evaluate(([nodeId, value]) => {
-    const node = window.app.graph.getNodeById(Number(nodeId))
-    node.widgets.find((w) => w.name === 'value').value = value
-    window.app.graph.setDirtyCanvas(true, true)
-  }, [promptNode, text])
-  await page.waitForTimeout(1200)
+const focusPromptBox = () =>
+  page.evaluate((nodeId) => {
+    const current = window.app.graph.getNodeById(Number(nodeId)).widgets.find((w) => w.name === 'value').value
+    const el = [...document.querySelectorAll('textarea')].find((t) => t.value === current && t.isConnected)
+    if (!el) return false
+    el.focus()
+    el.select()
+    return document.activeElement === el
+  }, promptNode)
+const runButton = page.getByTestId('queue-button')
+
+for (const [index, text] of prompts.entries()) {
+  if (!(await focusPromptBox())) throw new Error('prompt box did not take focus')
+  await page.keyboard.press('Backspace')
+  await page.keyboard.type(text, { delay: 35 })
+  await page.mouse.click(1000, 1060)
+  await page.waitForTimeout(500)
   const done = page.evaluate(
-    () => new Promise((resolve) => {
-      const onStatus = (e) => {
-        if (e.detail?.exec_info?.queue_remaining === 0) {
-          window.app.api.removeEventListener('status', onStatus)
-          resolve()
-        }
+    () => new Promise((resolve, reject) => {
+      const api = window.app.api
+      const finish = (handler) => (e) => {
+        api.removeEventListener('execution_success', onSuccess)
+        api.removeEventListener('execution_error', onError)
+        handler(e)
       }
-      window.app.api.addEventListener('status', onStatus)
+      const onSuccess = finish(() => resolve())
+      const onError = finish((e) => reject(new Error(JSON.stringify(e.detail).slice(0, 300))))
+      api.addEventListener('execution_success', onSuccess)
+      api.addEventListener('execution_error', onError)
+      setTimeout(() => reject(new Error('run did not finish in 120s')), 120_000)
     })
   )
-  await page.evaluate(() => window.app.queuePrompt(0))
+  await runButton.click()
   await done
-  await page.waitForTimeout(3000)
-  await page.screenshot({ path: path.join(outDir, `${name}-${prompts.indexOf(text)}.png`) })
+  await page.waitForTimeout(3500)
+  await page.screenshot({ path: path.join(outDir, `${name}-${index}.png`) })
 }
 
+const video = page.video()
 await context.close()
+fs.renameSync(await video.path(), path.join(outDir, `${name}.webm`))
 await browser.close()
