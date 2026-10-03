@@ -2,7 +2,7 @@ import { chromium } from '@playwright/test'
 import fs from 'node:fs'
 import path from 'node:path'
 
-const [apiPath, promptNode, ...prompts] = process.argv.slice(2)
+const [apiPath, promptNode, ...steps] = process.argv.slice(2)
 const base = process.env.COMFY_URL ?? 'http://127.0.0.1:8199'
 const outDir = process.env.OUT_DIR ?? 'recordings'
 const size = { width: 1920, height: 1080 }
@@ -61,12 +61,31 @@ const focusPromptBox = () =>
   }, promptNode)
 const runButton = page.getByTestId('queue-button')
 
-for (const [index, text] of prompts.entries()) {
-  if (!(await focusPromptBox())) throw new Error('prompt box did not take focus')
-  await page.keyboard.press('Backspace')
-  await page.keyboard.type(text, { delay: 35 })
-  await page.mouse.click(1000, 1060)
-  await page.waitForTimeout(500)
+const setWidget = (spec) =>
+  page.evaluate((spec) => {
+    const [, nodeId, name, value] = spec.match(/^@(\d+)\.(\w+)=(.*)$/)
+    const widget = window.app.graph.getNodeById(Number(nodeId)).widgets.find((w) => w.name === name)
+    widget.value = value
+    widget.callback?.(value)
+    window.app.graph.setDirtyCanvas(true, true)
+  }, spec)
+const currentPrompt = () =>
+  page.evaluate((nodeId) => window.app.graph.getNodeById(Number(nodeId)).widgets.find((w) => w.name === 'value').value, promptNode)
+
+let index = 0
+for (const step of steps) {
+  if (step.startsWith('@')) {
+    await setWidget(step)
+    await page.waitForTimeout(1500)
+    continue
+  }
+  if (step !== (await currentPrompt())) {
+    if (!(await focusPromptBox())) throw new Error('prompt box did not take focus')
+    await page.keyboard.press('Backspace')
+    await page.keyboard.type(step, { delay: 35 })
+    await page.mouse.click(1000, 1060)
+    await page.waitForTimeout(500)
+  }
   const done = page.evaluate(
     () => new Promise((resolve, reject) => {
       const api = window.app.api
@@ -85,7 +104,7 @@ for (const [index, text] of prompts.entries()) {
   await runButton.click()
   await done
   await page.waitForTimeout(3500)
-  await page.screenshot({ path: path.join(outDir, `${name}-${index}.png`) })
+  await page.screenshot({ path: path.join(outDir, `${name}-${index++}.png`) })
 }
 
 const video = page.video()

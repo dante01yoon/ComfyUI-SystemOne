@@ -39,28 +39,22 @@ Replaced the earlier "adaptive steps" idea. Its scores were in the right order
 but confidence was 0.12-0.15, and SDXL Turbo barely changes between 3 and 5
 steps, so the demo showed nothing.
 
-### 3. Prompt guard (Noul, Jev vs Laya)
-Prompt -> **Yes/No** ("names a real celebrity or public figure?") -> `verdict`
--> `If/Else Switch` (true: safe fallback prompt, false: user prompt).
-Recording: same graph, provider toggled on the Backend node. Laya misses
-"Elon Musk"; Jev catches it. Needs `TYPESAFE_API_KEY`.
+### 3. Real-person guard, Laya and Jev side by side (done)
+Two Yes/No nodes, one per backend, on the same prompt. Stops before sampling so
+no real person's likeness is rendered. Laya scored real people 0.33-0.47 and a
+generic businessman 0.39 (no separating threshold); Jev scored 0.99 vs 0.03.
 
-### 4. One switch, two models
-Demo 1 with the Backend node flipped from `laya` to `jev`. Side-by-side clip of
-the probability bars and `latency_ms` from `report`. Message: local and free vs
-hosted and stronger, same graph.
+### 4. One dropdown, two models (done)
+Demo 1's graph with prompts that imply a style through a reference. Korean
+prompts were dropped from this demo because SDXL's CLIP cannot read Korean, so
+even a correct route would not show the subject. On 8 implicit prompts Jev was
+8/8 at confidence >= 0.99; Laya was 7/8 but routed only 3 past the 0.5 gate.
 
 ### Known limitation (README, not a demo)
-Korean prompts misroute on both Laya checkpoints. Translate first or use Jev.
+Korean prompts misroute on both Laya checkpoints; Jev handled them.
 
 ## Recording pipeline
-1. Start ComfyUI on a fixed port with the pack symlinked into `custom_nodes`.
-2. Playwright (chromium, `recordVideo`, 1600x1000) loads the workflow from
-   `examples/`, types each prompt, queues, waits on the `/history` entry.
-3. `ffmpeg` trims and exports MP4 plus a 960px GIF for the README.
-The script lives in `scripts/record_demo.ts` so any demo can be re-recorded.
-
-## Blocked on
-- An image checkpoint for demos 1-3 (none installed locally).
-- `TYPESAFE_API_KEY` for demos 3-4.
-- Permission to create the public GitHub repo.
+`scripts/record_demo.mjs` (Playwright, 1920x1080) lays out nodes from each
+example's `_meta.layout`, types each prompt, clicks Run, and waits for
+`execution_success`. `@node.widget=value` arguments change a widget between
+runs. `scripts/make_media.sh` trims the start and writes the MP4 and README GIF.

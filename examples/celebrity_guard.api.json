@@ -1,0 +1,258 @@
+{
+ "1": {
+  "class_type": "PrimitiveStringMultiline",
+  "inputs": {
+   "value": "Taylor Swift on stage, concert photo"
+  },
+  "_meta": {
+   "layout": {
+    "pos": [
+     40,
+     330
+    ],
+    "size": [
+     420,
+     170
+    ],
+    "collapsed": false
+   },
+   "title": "Your prompt"
+  }
+ },
+ "2": {
+  "class_type": "PrimitiveStringMultiline",
+  "inputs": {
+   "value": "a friendly cartoon robot waving hello, flat illustration"
+  },
+  "_meta": {
+   "layout": {
+    "pos": [
+     40,
+     540
+    ],
+    "size": [
+     420,
+     150
+    ],
+    "collapsed": false
+   },
+   "title": "Stand-in prompt for real people"
+  }
+ },
+ "10": {
+  "class_type": "SystemOneBackend",
+  "inputs": {
+   "provider": "laya",
+   "laya_checkpoint": "convaiinnovations/laya",
+   "device": "auto",
+   "jev_model": "jev-1.13.0"
+  },
+  "_meta": {
+   "layout": {
+    "pos": [
+     500,
+     40
+    ],
+    "size": [
+     380,
+     190
+    ],
+    "collapsed": false
+   },
+   "title": "Backend: Laya"
+  }
+ },
+ "11": {
+  "class_type": "SystemOneNoul",
+  "inputs": {
+   "backend": [
+    "10",
+    0
+   ],
+   "state": [
+    "1",
+    0
+   ],
+   "instructions": "Does this image prompt name a specific real-world celebrity or public figure?",
+   "true_criteria": "mentions a real named person such as a celebrity, politician, or CEO",
+   "false_criteria": "only fictional, generic, or unnamed people, or no people",
+   "threshold": 0.5
+  },
+  "_meta": {
+   "layout": {
+    "pos": [
+     920,
+     40
+    ],
+    "size": [
+     560,
+     520
+    ],
+    "collapsed": false
+   },
+   "title": "Laya: names a real person?"
+  }
+ },
+ "12": {
+  "class_type": "ComfySwitchNode",
+  "inputs": {
+   "switch": [
+    "11",
+    1
+   ],
+   "on_true": [
+    "2",
+    0
+   ],
+   "on_false": [
+    "1",
+    0
+   ]
+  },
+  "_meta": {
+   "layout": {
+    "pos": [
+     1520,
+     40
+    ],
+    "size": [
+     360,
+     130
+    ],
+    "collapsed": false
+   },
+   "title": "Laya: prompt used"
+  }
+ },
+ "13": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "12",
+    0
+   ]
+  },
+  "_meta": {
+   "layout": {
+    "pos": [
+     1520,
+     210
+    ],
+    "size": [
+     360,
+     200
+    ],
+    "collapsed": false
+   },
+   "title": "Laya would generate"
+  }
+ },
+ "20": {
+  "class_type": "SystemOneBackend",
+  "inputs": {
+   "provider": "jev",
+   "laya_checkpoint": "convaiinnovations/laya",
+   "device": "auto",
+   "jev_model": "jev-1.13.0"
+  },
+  "_meta": {
+   "layout": {
+    "pos": [
+     500,
+     620
+    ],
+    "size": [
+     380,
+     190
+    ],
+    "collapsed": false
+   },
+   "title": "Backend: Jev"
+  }
+ },
+ "21": {
+  "class_type": "SystemOneNoul",
+  "inputs": {
+   "backend": [
+    "20",
+    0
+   ],
+   "state": [
+    "1",
+    0
+   ],
+   "instructions": "Does this image prompt name a specific real-world celebrity or public figure?",
+   "true_criteria": "mentions a real named person such as a celebrity, politician, or CEO",
+   "false_criteria": "only fictional, generic, or unnamed people, or no people",
+   "threshold": 0.5
+  },
+  "_meta": {
+   "layout": {
+    "pos": [
+     920,
+     620
+    ],
+    "size": [
+     560,
+     520
+    ],
+    "collapsed": false
+   },
+   "title": "Jev: names a real person?"
+  }
+ },
+ "22": {
+  "class_type": "ComfySwitchNode",
+  "inputs": {
+   "switch": [
+    "21",
+    1
+   ],
+   "on_true": [
+    "2",
+    0
+   ],
+   "on_false": [
+    "1",
+    0
+   ]
+  },
+  "_meta": {
+   "layout": {
+    "pos": [
+     1520,
+     620
+    ],
+    "size": [
+     360,
+     130
+    ],
+    "collapsed": false
+   },
+   "title": "Jev: prompt used"
+  }
+ },
+ "23": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "22",
+    0
+   ]
+  },
+  "_meta": {
+   "layout": {
+    "pos": [
+     1520,
+     790
+    ],
+    "size": [
+     360,
+     200
+    ],
+    "collapsed": false
+   },
+   "title": "Jev would generate"
+  }
+ }
+}
