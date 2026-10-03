@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-systemone"
-version = "0.1.0"
-description = "ComfyUI nodes that ask a System One decision model (Laya locally or Jev over the TypeSafe API) a typed question, so workflows can branch on natural-language judgment."
+version = "0.2.0"
+description = "ComfyUI nodes that ask a System One decision model (Laya locally, Jev, or Cloudflare Clef) a typed question, so workflows can branch on natural-language judgment and auto-QA generated images."
 license = { file = "LICENSE" }
 dependencies = ["laya>=0.3.24"]
 

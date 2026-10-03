@@ -1,17 +1,19 @@
-# ComfyUI System One (Jev / Laya)
+# ComfyUI System One (Jev / Laya / Clef)
 
 Branch a ComfyUI workflow on a natural-language judgment. Ask "which style does
 this prompt want?", "is this too graphic for kids?", or "does this name a real
 person?" and get a typed answer your graph can route on: a label, a
 probability, or a score, each with a confidence.
 
-The nodes talk to two interchangeable **System One** decision models through
-the same question and answer shape:
+The nodes talk to three interchangeable **System One** decision models through
+the same question and answer shape. Clef can also look at images, which turns
+it into an automatic QA step for generated images.
 
 | Backend | Where it runs | Cost | Setup |
 | --- | --- | --- | --- |
 | [Laya](https://huggingface.co/convaiinnovations/laya) | Locally, inside ComfyUI (MPS / CUDA / CPU) | Free | `pip install laya` |
 | [Jev](https://docs.typesafe.ai) by TypeSafe | Hosted API | Per input token | `TYPESAFE_API_KEY` env var |
+| [Clef / Clef-flash](https://developers.cloudflare.com/workers-ai/models/clef-flash/) by Cloudflare | Workers AI API, sees images | Per input token ($0.09/M for flash) | `CLOUDFLARE_ACCOUNT_ID` + `CLOUDFLARE_API_TOKEN` env vars |
 
 Flip one dropdown on the **System One Backend** node to move a whole graph
 between them.
@@ -35,10 +37,12 @@ git clone https://github.com/dante01yoon/ComfyUI-SystemOne
 pip install -r ComfyUI-SystemOne/requirements.txt
 ```
 
-For Jev, export the key in the shell that starts ComfyUI:
+For the hosted backends, export the keys in the shell that starts ComfyUI:
 
 ```bash
-export TYPESAFE_API_KEY=...
+export TYPESAFE_API_KEY=...          # Jev
+export CLOUDFLARE_ACCOUNT_ID=...     # Clef
+export CLOUDFLARE_API_TOKEN=...      # a token with Workers AI permission
 ```
 
 Laya downloads its weights from Hugging Face on first use and caches them.
@@ -51,11 +55,13 @@ All nodes live under the **SystemOne** category.
 
 | Node | Inputs | Outputs |
 | --- | --- | --- |
-| System One Backend | `provider` (laya / jev), `laya_checkpoint`, `device`, `jev_model` | `backend` |
+| System One Backend | `provider` (laya / jev / clef-flash / clef), `laya_checkpoint`, `device`, `jev_model` | `backend` |
 | System One Choice | `backend`, `state`, `instructions`, `options` (one `label: description` per line), `min_confidence`, `fallback` | `choice`, `confidence`, `confident`, `report` |
 | System One Yes/No | `backend`, `state`, `instructions`, `true_criteria`, `false_criteria`, `threshold` | `probability`, `verdict`, `report` |
 | System One Score | `backend`, `state`, `instructions`, `levels` (one per line, low to high) | `score`, `level`, `confidence`, `report` |
 | System One Map | `key`, `mapping` (`key => value` lines, `* => default`) | `value` |
+| System One Image Check (Clef) | `backend`, `images`, `instructions` (a yes/no question about one image), `reject_when` (yes / no), `threshold`, `context` | `passed` (images that pass), `passed_count`, `report` |
+| System One Pick Best Image (Clef) | `backend`, `images`, `instructions`, `context` | `best`, `index`, `confidence`, `report` |
 
 - `state` is the text the model judges, usually your prompt. Text that parses
   as a JSON object or array is sent as structured state.
@@ -63,6 +69,13 @@ All nodes live under the **SystemOne** category.
   so an unsure model never picks a branch on a coin flip.
 - `report` is JSON with the question, the raw answer, the backend, and the
   latency, for logging or debugging.
+- Image Check asks its question about every image in the batch separately. If
+  nothing passes, it blocks the nodes downstream, so nothing gets saved.
+- Pick Best Image compares up to 4 images per call and runs heats plus a final
+  for bigger batches. `index` points into the batch it received.
+- Images go to Clef as downscaled JPEGs (long side 512 down to 256, to fit the
+  Workers AI request budget). The `passed` and `best` outputs are your original
+  full-resolution images.
 - After a run, each judgment node shows its answer and every option's
   probability as a text bar on the node itself.
 
@@ -168,6 +181,40 @@ National Geographic, wet-on-wet), Jev answered all 8 correctly with confidence
 confidence below 0.5, so with demo 1's gate Laya routes 3 of 8 to the intended
 style.
 
+### 5. Automated image QA (Clef-flash)
+
+[`examples/image_qa.json`](examples/image_qa.json) ·
+[video](docs/media/image_qa.mp4)
+
+![Image QA demo](docs/media/image_qa.gif)
+
+SDXL Turbo renders 4 candidates for "exactly three red apples on a white
+table". **Image Check** asks Clef-flash about each one: "Does the image show
+exactly three apples, no more and no fewer?" Images that fail are dropped.
+**Pick Best Image** then chooses among the survivors, and only that one is
+saved. Nobody has to look through the batch.
+
+![The four candidates](docs/media/image_qa-candidates.png)
+
+| Candidate | Apples | Clef-flash "exactly three?" | Result |
+| --- | --- | --- | --- |
+| 1 | 3 | 0.96 | pass |
+| 2 | 3 | 0.97 | pass |
+| 3 | 3 | 0.97 | pass, picked as best (0.79) |
+| 4 | 4 | 0.03 | rejected |
+
+A second seed in the recording also caught the one bad image (five apples) and
+kept three; the pick among three near-identical survivors came back with low
+confidence (0.16), which is a cue that any of them would do.
+
+Clef-flash really reads the image rather than the prompt. Asked "does this
+image match a watercolor cat?" about a photo of a knight, it said 0.004; the
+same question with no image attached said 0.90. Given four different images
+and four prompts, it picked the right image for each, with confidence 0.92 to
+0.96, in 0.3 to 0.9 seconds per call.
+
+![Seed 7 run](docs/media/image_qa-seed7.png)
+
 ## Choosing a backend
 
 Measured on 2026-10-02 with `laya` 0.3.24 (`convaiinnovations/laya`, MPS) and
@@ -181,9 +228,12 @@ Measured on 2026-10-02 with `laya` 0.3.24 (`convaiinnovations/laya`, MPS) and
 | Names a real celebrity or public figure | Cannot separate | 0.99 vs 0.03 |
 | Graphic or gory content (Score) | Separated 12 of 12 at 2.0 | Not measured |
 | Latency per answer | 0.03 to 0.3 s, local | 0.15 to 0.23 s, network |
+| Looks at images | No | No |
 
 Start with Laya for explicit, English, local judgments. Switch to Jev when the
 answer needs world knowledge (people, artists, studios) or another language.
+Use Clef when the question is about the generated image itself; it answered
+the image questions above in 0.3 to 0.9 s.
 
 ## Re-recording the demos
 
@@ -212,8 +262,10 @@ Both scripts expect ComfyUI on `http://127.0.0.1:8199`. Override it with
 
 ## Limits
 
-- Both models judge text only. To judge an image, caption it first and pass
-  the caption as `state`.
+- Laya and Jev judge text only; give image questions to a Clef backend.
+- Workers AI estimates a request's size from its raw body, so Clef calls carry
+  at most 4 images and downscale them to fit. A 512px PNG batch of four is
+  rejected before the model sees it; the nodes handle this for you.
 - Laya reads at most 512 tokens of state, and its option labels share a
   192-token budget.
 - Laya's checkpoint warns that some of its temperatures are outside the

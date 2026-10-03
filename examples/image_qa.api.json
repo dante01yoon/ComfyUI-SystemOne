@@ -1,0 +1,296 @@
+{
+ "1": {
+  "class_type": "CheckpointLoaderSimple",
+  "inputs": {
+   "ckpt_name": "sd_xl_turbo_1.0_fp16.safetensors"
+  },
+  "_meta": {
+   "layout": {
+    "pos": [
+     40,
+     1290
+    ],
+    "size": null,
+    "collapsed": true
+   }
+  }
+ },
+ "2": {
+  "class_type": "SystemOneBackend",
+  "inputs": {
+   "provider": "clef-flash",
+   "laya_checkpoint": "convaiinnovations/laya",
+   "device": "auto",
+   "jev_model": "jev-1.13.0"
+  },
+  "_meta": {
+   "layout": {
+    "pos": [
+     40,
+     260
+    ],
+    "size": [
+     420,
+     190
+    ],
+    "collapsed": false
+   },
+   "title": "System One Backend: Clef-flash"
+  }
+ },
+ "3": {
+  "class_type": "PrimitiveStringMultiline",
+  "inputs": {
+   "value": "exactly three red apples on a white table, studio photo"
+  },
+  "_meta": {
+   "layout": {
+    "pos": [
+     40,
+     40
+    ],
+    "size": [
+     420,
+     180
+    ],
+    "collapsed": false
+   },
+   "title": "Your prompt"
+  }
+ },
+ "4": {
+  "class_type": "CLIPTextEncode",
+  "inputs": {
+   "clip": [
+    "1",
+    1
+   ],
+   "text": [
+    "3",
+    0
+   ]
+  },
+  "_meta": {
+   "layout": {
+    "pos": [
+     300,
+     1290
+    ],
+    "size": null,
+    "collapsed": true
+   }
+  }
+ },
+ "5": {
+  "class_type": "CLIPTextEncode",
+  "inputs": {
+   "clip": [
+    "1",
+    1
+   ],
+   "text": "blurry, lowres, text, watermark"
+  },
+  "_meta": {
+   "layout": {
+    "pos": [
+     560,
+     1290
+    ],
+    "size": null,
+    "collapsed": true
+   }
+  }
+ },
+ "6": {
+  "class_type": "EmptyLatentImage",
+  "inputs": {
+   "width": 512,
+   "height": 512,
+   "batch_size": 4
+  },
+  "_meta": {
+   "layout": {
+    "pos": [
+     820,
+     1290
+    ],
+    "size": null,
+    "collapsed": true
+   }
+  }
+ },
+ "7": {
+  "class_type": "KSampler",
+  "inputs": {
+   "model": [
+    "1",
+    0
+   ],
+   "positive": [
+    "4",
+    0
+   ],
+   "negative": [
+    "5",
+    0
+   ],
+   "latent_image": [
+    "6",
+    0
+   ],
+   "seed": 7,
+   "control_after_generate": "fixed",
+   "steps": 4,
+   "cfg": 1.0,
+   "sampler_name": "euler_ancestral",
+   "scheduler": "sgm_uniform",
+   "denoise": 1.0
+  },
+  "_meta": {
+   "layout": {
+    "pos": [
+     1080,
+     1290
+    ],
+    "size": null,
+    "collapsed": true
+   }
+  }
+ },
+ "8": {
+  "class_type": "VAEDecode",
+  "inputs": {
+   "samples": [
+    "7",
+    0
+   ],
+   "vae": [
+    "1",
+    2
+   ]
+  },
+  "_meta": {
+   "layout": {
+    "pos": [
+     1340,
+     1290
+    ],
+    "size": null,
+    "collapsed": true
+   }
+  }
+ },
+ "9": {
+  "class_type": "PreviewImage",
+  "inputs": {
+   "images": [
+    "8",
+    0
+   ]
+  },
+  "_meta": {
+   "layout": {
+    "pos": [
+     500,
+     40
+    ],
+    "size": [
+     600,
+     640
+    ],
+    "collapsed": false
+   },
+   "title": "4 candidates"
+  }
+ },
+ "10": {
+  "class_type": "SystemOneImageCheck",
+  "inputs": {
+   "backend": [
+    "2",
+    0
+   ],
+   "images": [
+    "8",
+    0
+   ],
+   "context": [
+    "3",
+    0
+   ],
+   "instructions": "Does the image show exactly three apples, no more and no fewer?",
+   "reject_when": "no",
+   "threshold": 0.5
+  },
+  "_meta": {
+   "layout": {
+    "pos": [
+     1140,
+     40
+    ],
+    "size": [
+     480,
+     640
+    ],
+    "collapsed": false
+   },
+   "title": "Image Check: exactly three apples?"
+  }
+ },
+ "11": {
+  "class_type": "SystemOnePickBestImage",
+  "inputs": {
+   "backend": [
+    "2",
+    0
+   ],
+   "images": [
+    "10",
+    0
+   ],
+   "context": [
+    "3",
+    0
+   ],
+   "instructions": "Which attached image best matches the prompt in `prompt`?"
+  },
+  "_meta": {
+   "layout": {
+    "pos": [
+     1140,
+     720
+    ],
+    "size": [
+     480,
+     520
+    ],
+    "collapsed": false
+   },
+   "title": "Pick Best Image"
+  }
+ },
+ "12": {
+  "class_type": "SaveImage",
+  "inputs": {
+   "images": [
+    "11",
+    0
+   ],
+   "filename_prefix": "systemone/image_qa"
+  },
+  "_meta": {
+   "layout": {
+    "pos": [
+     1660,
+     40
+    ],
+    "size": [
+     520,
+     600
+    ],
+    "collapsed": false
+   },
+   "title": "Kept"
+  }
+ }
+}
