@@ -1,8 +1,15 @@
+import io as bytes_io
+from functools import partial
+
+import numpy as np
+import torch
+from comfy_api.latest import ComfyExtension, io, ui
+from comfy_execution.graph_utils import ExecutionBlocker
+from PIL import Image
 from typing_extensions import override
 
-from comfy_api.latest import ComfyExtension, io, ui
-
-from .backends import DEFAULT_JEV_MODEL, DEVICES, LAYA_CHECKPOINTS, PROVIDERS, build_backend
+from .backends import DEFAULT_JEV_MODEL, DEVICES, LAYA_CHECKPOINTS, PROVIDERS, ImageSource, build_backend
+from .images import check_images, pick_best
 from .judgment import choose, score, yes_no
 from .questions import lookup, parse_mapping
 
@@ -22,6 +29,33 @@ def _judgment_inputs() -> list:
     ]
 
 
+JPEG_QUALITY = 85
+
+
+def _to_jpeg(image: torch.Tensor, long_side: int) -> bytes:
+    pixels = (image.clamp(0, 1) * 255).round().to(torch.uint8).cpu().numpy()
+    picture = Image.fromarray(np.ascontiguousarray(pixels)).convert("RGB")
+    picture.thumbnail((long_side, long_side), Image.LANCZOS)
+    buffer = bytes_io.BytesIO()
+    picture.save(buffer, format="JPEG", quality=JPEG_QUALITY)
+    return buffer.getvalue()
+
+
+def _sources(images: torch.Tensor) -> list[ImageSource]:
+    return [partial(_to_jpeg, image) for image in images]
+
+
+def _image_inputs() -> list:
+    return [
+        SystemOneBackendType.Input("backend", tooltip="Use a Clef provider; only Clef can see images."),
+        io.Image.Input("images"),
+    ]
+
+
+def _context_input() -> io.String.Input:
+    return _text("context", optional=True, default="", tooltip="Usually the generation prompt. Sent as the state's 'prompt'.")
+
+
 class SystemOneBackend(io.ComfyNode):
     @classmethod
     def define_schema(cls):
@@ -29,7 +63,10 @@ class SystemOneBackend(io.ComfyNode):
             node_id="SystemOneBackend",
             display_name="System One Backend",
             category=CATEGORY,
-            description="Pick the System One model: Laya runs locally, Jev calls the TypeSafe API (needs TYPESAFE_API_KEY).",
+            description=(
+                "Pick the System One model: Laya runs locally, Jev calls the TypeSafe API (needs TYPESAFE_API_KEY), "
+                "Clef calls Cloudflare Workers AI and can see images (needs CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN)."
+            ),
             inputs=[
                 io.Combo.Input("provider", options=PROVIDERS),
                 io.Combo.Input("laya_checkpoint", options=list(LAYA_CHECKPOINTS)),
@@ -152,7 +189,76 @@ class SystemOneMap(io.ComfyNode):
         return io.NodeOutput(lookup(parse_mapping(mapping), key))
 
 
+class SystemOneImageCheck(io.ComfyNode):
+    @classmethod
+    def define_schema(cls):
+        return io.Schema(
+            node_id="SystemOneImageCheck",
+            display_name="System One Image Check",
+            category=CATEGORY,
+            description="Ask a yes/no question about each image and keep only the images that pass.",
+            is_output_node=True,
+            inputs=[
+                *_image_inputs(),
+                _text("instructions", tooltip="A yes/no question about one image, e.g. 'Does the image show malformed hands?'"),
+                _context_input(),
+                _text("true_criteria", optional=True, default=""),
+                _text("false_criteria", optional=True, default=""),
+                io.Combo.Input("reject_when", options=["yes", "no"], default="yes", tooltip="Which answer drops the image."),
+                io.Float.Input("threshold", default=0.5, min=0.0, max=1.0, step=0.01),
+            ],
+            outputs=[
+                io.Image.Output(display_name="passed"),
+                io.Int.Output(display_name="passed_count"),
+                io.String.Output(display_name="report"),
+            ],
+        )
+
+    @classmethod
+    def execute(
+        cls, backend, images, instructions, reject_when, threshold, context="", true_criteria="", false_criteria=""
+    ) -> io.NodeOutput:
+        result = check_images(
+            backend, _sources(images), context, instructions,
+            true_criteria, false_criteria, reject_when, threshold,
+        )
+        passed = images[list(result.passed_indices)] if result.passed_indices else ExecutionBlocker(None)
+        return io.NodeOutput(passed, len(result.passed_indices), result.report, ui=ui.PreviewText(result.preview))
+
+
+class SystemOnePickBestImage(io.ComfyNode):
+    @classmethod
+    def define_schema(cls):
+        return io.Schema(
+            node_id="SystemOnePickBestImage",
+            display_name="System One Pick Best Image",
+            category=CATEGORY,
+            description="Pick the image of a batch that best fits the instructions. Batches over 4 run as heats.",
+            is_output_node=True,
+            inputs=[
+                *_image_inputs(),
+                _text("instructions", default="Which attached image best matches the prompt in `prompt`?"),
+                _context_input(),
+            ],
+            outputs=[
+                io.Image.Output(display_name="best"),
+                io.Int.Output(display_name="index"),
+                io.Float.Output(display_name="confidence"),
+                io.String.Output(display_name="report"),
+            ],
+        )
+
+    @classmethod
+    def execute(cls, backend, images, instructions, context="") -> io.NodeOutput:
+        result = pick_best(backend, _sources(images), context, instructions)
+        best = images[result.index : result.index + 1]
+        return io.NodeOutput(best, result.index, result.confidence, result.report, ui=ui.PreviewText(result.preview))
+
+
 class SystemOneExtension(ComfyExtension):
     @override
     async def get_node_list(self) -> list[type[io.ComfyNode]]:
-        return [SystemOneBackend, SystemOneChoice, SystemOneNoul, SystemOneScore, SystemOneMap]
+        return [
+            SystemOneBackend, SystemOneChoice, SystemOneNoul, SystemOneScore, SystemOneMap,
+            SystemOneImageCheck, SystemOnePickBestImage,
+        ]

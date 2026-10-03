@@ -1,7 +1,13 @@
 import { app } from '../../scripts/app.js'
 import { ComfyWidgets } from '../../scripts/widgets.js'
 
-const JUDGMENT_NODES = new Set(['SystemOneChoice', 'SystemOneNoul', 'SystemOneScore'])
+const JUDGMENT_NODES = new Set([
+  'SystemOneChoice',
+  'SystemOneNoul',
+  'SystemOneScore',
+  'SystemOneImageCheck',
+  'SystemOnePickBestImage'
+])
 const PREVIEW = 'answer'
 
 function showAnswer(node, text) {
